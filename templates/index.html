@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto house tracker</title>
+</head>
+<body>
+    <label>Area to search</label>
+    <input id="area_input">
+
+
+    <button onclick="send_all()" type="button">Send all</button>
+
+    <div id="scrape_output"></div>
+    
+</body>
+</html>
+
+<script>
+let current_area = ""  // track last searched area
+
+async function send_all(){
+    current_area = document.querySelector("#area_input").value
+
+    // 1. show current price-drop houses first
+    const res = await fetch("/search_location_in_database", {
+        method: "POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            "area": current_area,
+        })
+    });
+
+    const response = await res.json();
+
+    document.querySelector("#scrape_output").innerHTML = response.reply
+
+    // 2. then run the scraper to pull in fresh data
+    await fetch("/run_web_scraper", {
+        method: "POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            "area": current_area,
+        })
+    });
+}
+
+async function refresh_output(){
+    if (current_area === "") return  // nothing searched yet, skip
+
+    const res = await fetch("/search_location_in_database", {
+        method: "POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            "area": current_area,
+        })
+    });
+
+    const response = await res.json();
+
+    document.querySelector("#scrape_output").innerHTML = response.reply
+}
+
+setInterval(refresh_output, 5000)  // re-check every 5 seconds
+</script>
