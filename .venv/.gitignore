@@ -1,0 +1,10 @@
+# Database
+houses.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.venv/
